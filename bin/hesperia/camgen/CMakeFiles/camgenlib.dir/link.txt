@@ -1,2 +1,0 @@
-/usr/bin/ar cr libcamgenlib.a  CMakeFiles/camgenlib.dir/src/CamGen.cpp.o CMakeFiles/camgenlib.dir/src/OpenGLGrabber.cpp.o
-/usr/bin/ranlib libcamgenlib.a

@@ -1,2 +1,0 @@
-/usr/bin/ar cr librecintegritylib.a  CMakeFiles/recintegritylib.dir/src/RecIntegrity.cpp.o
-/usr/bin/ranlib librecintegritylib.a

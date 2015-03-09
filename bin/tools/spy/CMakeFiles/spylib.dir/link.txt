@@ -1,2 +1,0 @@
-/usr/bin/ar cr libspylib.a  CMakeFiles/spylib.dir/src/Spy.cpp.o
-/usr/bin/ranlib libspylib.a

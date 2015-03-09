@@ -1,2 +1,0 @@
-/usr/bin/ar cr libVCRlib.a  CMakeFiles/VCRlib.dir/src/VCR.cpp.o
-/usr/bin/ranlib libVCRlib.a

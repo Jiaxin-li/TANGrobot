@@ -1,2 +1,0 @@
-/usr/bin/ar cr librec2stdoutlib.a  CMakeFiles/rec2stdoutlib.dir/src/Rec2Stdout.cpp.o
-/usr/bin/ranlib librec2stdoutlib.a

@@ -1,2 +1,0 @@
-/usr/bin/ar cr libvehiclecontext.a  CMakeFiles/vehiclecontext.dir/src/VehicleRuntimeControl.cpp.o CMakeFiles/vehiclecontext.dir/src/model/SimplifiedBicycleModel.cpp.o CMakeFiles/vehiclecontext.dir/src/model/IRUS.cpp.o CMakeFiles/vehiclecontext.dir/src/model/PointSensor.cpp.o CMakeFiles/vehiclecontext.dir/src/report/DistanceToObjectsReport.cpp.o
-/usr/bin/ranlib libvehiclecontext.a

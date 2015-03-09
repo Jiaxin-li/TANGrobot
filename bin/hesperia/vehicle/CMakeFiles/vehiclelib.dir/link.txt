@@ -1,0 +1,2 @@
+/usr/bin/ar cr libvehiclelib.a  CMakeFiles/vehiclelib.dir/src/Vehicle.cpp.o CMakeFiles/vehiclelib.dir/src/LinearBicycleModelNew.cpp.o CMakeFiles/vehiclelib.dir/src/LinearBicycleModel.cpp.o
+/usr/bin/ranlib libvehiclelib.a

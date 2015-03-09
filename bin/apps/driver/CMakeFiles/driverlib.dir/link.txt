@@ -1,0 +1,2 @@
+/usr/bin/ar cr libdriverlib.a  CMakeFiles/driverlib.dir/src/Driver.cpp.o
+/usr/bin/ranlib libdriverlib.a

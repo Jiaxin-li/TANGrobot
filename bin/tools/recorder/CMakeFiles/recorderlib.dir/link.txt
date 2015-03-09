@@ -1,0 +1,2 @@
+/usr/bin/ar cr librecorderlib.a  CMakeFiles/recorderlib.dir/src/RecorderModule.cpp.o
+/usr/bin/ranlib librecorderlib.a

@@ -1,0 +1,2 @@
+/usr/bin/ar cr libiruslib.a  CMakeFiles/iruslib.dir/src/IRUS.cpp.o CMakeFiles/iruslib.dir/src/PointSensor.cpp.o
+/usr/bin/ranlib libiruslib.a

@@ -1,0 +1,3 @@
+#!/bin/bash 
+echo "manully control."
+xterm -e ./supercomponent --cid=111 & xterm -e ./cockpit --cid=111 & xterm -e ./vehicle --cid=111 --freq=10

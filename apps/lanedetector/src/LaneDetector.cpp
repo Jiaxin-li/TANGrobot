@@ -118,36 +118,56 @@ namespace msv {
     // You should start your work in this method.
     void LaneDetector::processImage() {
         // Example: Show the image.
+    	
+    	//draw a line       
+    	        int width = m_image -> width;
+    	        int height = m_image -> height;
+    	        int step  = m_image ->widthStep;
+    	        unsigned char* image = (unsigned char*)m_image->imageData;
+    	        int ver_sanple = 60; 
+    	        int desired_right_distance =150; 
+    	        double k = 0.06; //portion control 
+    	        int max_left = -24;
+    	        int max_right = 24;// max turning steering 
+    	        //cout << " width:"<< width<<endl;
+    	        //cout << " height:"<< height<<endl;
+    	        CvScalar red = CV_RGB(250,0,0);
+    	        CvScalar green = CV_RGB(0,250,0);
+    	        int thickness = 2;
+    	        int connectivity = 8;
+    	        CvPoint vers = cvPoint(width/2,height);
+    	        CvPoint vere = cvPoint(width/2,0);
+    	        CvPoint hors = cvPoint(width/2,height- ver_sanple);
+    	        CvPoint hore = cvPoint(width,height- ver_sanple);
+    	        cvLine(m_image,vers,vere,red,thickness,connectivity);
+    	        cvLine(m_image,hors,hore,green,thickness,connectivity);
+    	        
         if (m_debug) {
             if (m_image != NULL) {
+            	
+
                 cvShowImage("WindowShowImage", m_image);
                 cvWaitKey(10);
             }
         }
 
         //TODO: Start here.
-        //draw a line
-        //cv::Size s = m_image.size();
         
-        int width = 100;//s.width;
-        int height = 100;//s.height();
-        Point start = Point(width/2, height);
-        Point end = Point(width/2, 0);
-        int thickness = 2;
-          int lineType = 8;
-          line( m_image, start,  end, Scalar( 255, 0, 0 ), thickness,lineType );
-
+        int right_distance = 0;
+        
         // 1. Do something with the image m_image here, for example: find lane marking features, optimize quality, ...
-
-
-
+        // find right distance 
+        while((image[(height- ver_sanple+3)*step - right_distance]==0) && right_distance < width/2 ) right_distance ++; //WTF is - to the right??
+        
+        cout << "right_distance:"<< right_distance<<endl;
         // 2. Calculate desired steering commands from your image features to be processed by driver.
-
-
-
+        
+        double difference = ( desired_right_distance- right_distance) *k ; //right_distance- desired_right_distance
+        if (difference < max_left) difference = max_left;
+        else if ( difference > max_right) difference = max_right;
         // Here, you see an example of how to send the data structure SteeringData to the ContainerConference. This data structure will be received by all running components. In our example, it will be processed by Driver. To change this data structure, have a look at Data.odvd in the root folder of this source.
         SteeringData sd;
-        sd.setExampleData(1234.56);
+        sd.setExampleData(difference);
 
         // Create container for finally sending the data.
         Container c(Container::USER_DATA_1, sd);

@@ -42,6 +42,8 @@ namespace msv {
     using namespace core::data::image;
     using namespace tools::player;
     using namespace cv;
+    
+    bool intersection_protect = 0;
 
     LaneDetector::LaneDetector(const int32_t &argc, char **argv) : ConferenceClientModule(argc, argv, "lanedetector"),
         m_hasAttachedToSharedImageMemory(false),
@@ -129,8 +131,8 @@ namespace msv {
     	        int sample_mid2 = 90; //define mid vision
     	        int sample_mid3 = 120; //define mid vision
     	        int sample_far = 240; // define further vision
-    	        int desired_right_near =243; //220
-    	        int desired_right_far =75; 
+    	        int desired_right_near =241; //243
+    	        int desired_right_far =75; // 73
     	        double k = 0.12; //portion control 0.2
     	        int max_left = -24;
     	        int max_right = 24;// max turning steering 
@@ -141,13 +143,12 @@ namespace msv {
     	        CvScalar blue = CV_RGB(0,0,250);
     	        int thickness = 1;
     	        int connectivity = 8;
-    	        bool near_lost = 0;// near vision lost
+    	        bool near_lost = 0;// near vision lost    	       
     	        bool far_lost = 0;//  far vision lost
-    	        bool near_lost_left = 0; // near vision lost (left)
-    	        bool mid_lost_left = 0;
-    	        bool mid2_lost_left = 0;
-    	        bool mid3_lost_left = 0;
-    	        bool intersection_protect = 0;
+    	        bool left_lost = 0; // left vision lost (left)
+    	        
+    	       
+    	        double left_range = 0.4; // (0,0.5)
     	        
     	        CvPoint ver_centr_start = cvPoint(width/2,height);
     	        CvPoint ver_centr_end = cvPoint(width/2,0);
@@ -167,8 +168,9 @@ namespace msv {
        
 
         //TODO: Start here.
-        
-        int right_near = 0;
+    	int right_near = 0;
+        int right_near1 = 0;
+        int right_near2 = 0;
         int right_far = 0;
         int left_near=0;
         int left_mid=0;
@@ -177,17 +179,33 @@ namespace msv {
         // 1. Do something with the image m_image here, for example: find lane marking features, optimize quality, ...
         // find right distance 
         //  I (x, y) ~ ((unsigned char*) (img-> imageData + img-> widthStep * y)) [x]        3 chanel     
-        double left_range = 0.4; // (0,0.5)
-        while((image + step * (height- sample_near)) [(width/2+right_near)*3]==0 && right_near < width/2 ){ right_near ++;} 
+        
+        while((image + step * (height- sample_near -2)) [(width/2+right_near1)*3]==0 && right_near1 < width/2 ){ right_near1 ++;} 
+        while((image + step * (height- sample_near +2)) [(width/2+right_near2)*3]==0 && right_near2 < width/2 ){ right_near2 ++;} 
         while((image + step * (height- sample_far)) [(width/2+right_far)*3]==0 && right_far < width/2 ) {right_far++; }
-        while((image + step * (height- sample_near)) [(width/2-left_near)*3]==0 && left_near < width*left_range+1 ){ left_near ++;}
-        while((image + step * (height- sample_mid)) [(width/2-left_mid)*3]==0 && left_mid < width*left_range +1 ){ left_mid ++;}
-        while((image + step * (height- sample_mid2)) [(width/2-left_mid2)*3]==0 && left_mid2 < width*left_range+1  ){ left_mid2 ++;}
-        while((image + step * (height- sample_mid3)) [(width/2-left_mid3)*3]==0 && left_mid3 < width*left_range +1 ){ left_mid3 ++;}
-        if (right_near >= width/2){ // near vision lost
-        	near_lost = 1;  	   
+        while((image + step * (height- sample_near)) [(width/2-left_near)*3]==0 && left_near < width/2 ){ left_near ++;}
+        while((image + step * (height- sample_mid)) [(width/2-left_mid)*3]==0 && left_mid < width/2 ){ left_mid ++;}
+        while((image + step * (height- sample_mid2)) [(width/2-left_mid2)*3]==0 && left_mid2 < width/2 ){ left_mid2 ++;}
+        while((image + step * (height- sample_mid3)) [(width/2-left_mid3)*3]==0 && left_mid3 < width/2 ){ left_mid3 ++;}
+        
+        if (right_near1 ==0 ||right_near2 ==0){ // this case happens only when running into the stop line when entering the intersection
+        	right_near = desired_right_near;
         }
-        else {
+        
+        if (right_near1 >= width/2 && right_near2 >= width/2 ){ // near vision lost
+        	near_lost = 1; 
+        	
+        }
+        else { 		// near vision not lost , decide right_near
+        	if (right_near1 >= width/2){ 
+        		right_near = right_near2;       	
+        	}
+        	else if (right_near2 >= width/2){
+        		right_near = right_near1;  
+        	} 
+        	else{
+        		right_near = (right_near1 + right_near2)/2 ;
+        	}
         	near_lost = 0; 
         }
         
@@ -198,30 +216,13 @@ namespace msv {
                 	far_lost = 0; 
                 }
         
-        if (left_near  >= width*left_range){ // near vision lost left
-        			near_lost_left = 1;  	   
-                  }
-                 else {
-                        	near_lost_left = 0; 
-                  }
-        if (left_mid  >= width*left_range){ // mid vision lost left
-               	mid_lost_left = 1;  	   
-                }
-                else {
-                mid_lost_left = 0; 
-                }
-        if (left_mid2  >= width*left_range){ // mid vision lost left
-                      	mid2_lost_left = 1;  	   
-                       }
-                       else {
-                       mid2_lost_left = 0; 
-                       }
-        if (left_mid3  >= width*left_range){ // mid vision lost left
-                              	mid3_lost_left = 1;  	   
-                               }
-                               else {
-                               mid3_lost_left = 0; 
-                               }
+        if (left_near  >= width*left_range && left_mid  >= width*left_range && left_mid2  >= width*left_range && left_mid3  >= width*left_range){ // left lost left
+        			left_lost = 1;  	   
+              }
+              else {
+                    left_lost = 0; 
+             }
+      
         
         // state machine
         
@@ -238,6 +239,7 @@ namespace msv {
        else{
             	 cout << "right_far:"<< right_far<<endl;
             }
+       
        near_sample_end = cvPoint(width/2 + right_near ,height- sample_near);
        far_sample_end = cvPoint(width/2 + right_far ,height- sample_far);
        near_sample_left_end = cvPoint(width/2 - left_near ,height- sample_near);
@@ -259,26 +261,25 @@ namespace msv {
               }
        
         // 2. Calculate desired steering commands from your image features to be processed by driver.
-       double difference;
+       double difference = 0;
        if (!near_lost){
     	   difference = (  right_near-desired_right_near) *k ;
-    	   intersection_protect = 0;
+    	   intersection_protect = 0; // unflag intersection protects
     	   
        } 
        else{   	 // near lost  
-    	   if (!(near_lost_left&& mid_lost_left &&mid2_lost_left&&mid3_lost_left)&& !intersection_protect){ 				//intersection mode !far_lost && 
+    	   if (!left_lost && !intersection_protect){ 
     		   difference = max_right;
     		   
     	   }
-    	   else{
-    		   
+    	   else if (!far_lost){ //intersection mode    		   
     		   difference = (  right_far-desired_right_far) *k ; 
-    		   intersection_protect = 1;
+    		   intersection_protect = 1;// 
     	   }
        }
        
        if (difference < max_left) difference = max_left;
-       else if ( difference > max_right) difference = max_right;
+       if ( difference > max_right) difference = max_right;
         
         
         

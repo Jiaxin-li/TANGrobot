@@ -23,7 +23,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 //#include <opencv2/core/utility.hpp>
-#include <opencv2/core/core_c.h> // missing befor needed for c style code
+#include <opencv2/core/core_c.h>
 
 #include "Camera.h"
 

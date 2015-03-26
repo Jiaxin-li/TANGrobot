@@ -1,0 +1,2 @@
+/usr/bin/ar cr libchasecarlib.a  CMakeFiles/chasecarlib.dir/src/ChaseCar.cpp.o CMakeFiles/chasecarlib.dir/src/OpenGLGrabber.cpp.o
+/usr/bin/ranlib libchasecarlib.a

@@ -1,0 +1,2 @@
+/usr/bin/ar cr libsupercomponentlib.a  CMakeFiles/supercomponentlib.dir/src/ConnectedModules.cpp.o CMakeFiles/supercomponentlib.dir/src/ConnectedModule.cpp.o CMakeFiles/supercomponentlib.dir/src/SuperComponent.cpp.o CMakeFiles/supercomponentlib.dir/src/GlobalConfigurationProvider.cpp.o
+/usr/bin/ranlib libsupercomponentlib.a

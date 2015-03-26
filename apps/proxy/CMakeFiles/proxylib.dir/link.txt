@@ -1,0 +1,2 @@
+/usr/bin/ar cr libproxylib.a  CMakeFiles/proxylib.dir/src/Proxy.cpp.o CMakeFiles/proxylib.dir/src/Camera.cpp.o CMakeFiles/proxylib.dir/src/OpenCVCamera.cpp.o
+/usr/bin/ranlib libproxylib.a

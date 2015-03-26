@@ -1,0 +1,14 @@
+-I/home/li/workspace/msv/tangyuanrobot/_buildtools/cxxtest
+-I/usr/include/qt4
+-I/usr/include/qt4/QtGui
+-I/usr/include/qt4/QtCore
+-I/home/li/workspace/msv/tangyuanrobot/libopendavinci/include
+-I/home/li/workspace/msv/tangyuanrobot/libdata/include
+-I/home/li/workspace/msv/tangyuanrobot/hesperia/libhesperia/include
+-I/home/li/workspace/msv/tangyuanrobot/hesperia/cockpit/include
+-DQT_NO_DEBUG
+-DQT_GUI_LIB
+-DQT_CORE_LIB
+-o
+/home/li/workspace/msv/tangyuanrobot/hesperia/cockpit/include/moc_MdiPlugIn.cxx
+/home/li/workspace/msv/tangyuanrobot/hesperia/cockpit/include/MdiPlugIn.h

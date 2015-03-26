@@ -7,8 +7,8 @@
 PROJECT (lanedetector)
 
 # OpenCV libraries.
-SET (OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui)
-
+#SET (OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui)    opencv_calib3d
+SET (OpenCV_LIBS opencv_core opencv_imgproc opencv_highgui )
 SET (HESPERIA_LIBS hesperia)
 SET (VEHICLECONTEXT_LIBS vehiclecontext)
 

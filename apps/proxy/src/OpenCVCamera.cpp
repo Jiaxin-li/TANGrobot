@@ -19,13 +19,13 @@
 
 #include <iostream>
 
-#include <opencv2/imgproc/imgproc_c.h>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv/highgui.h> // missing from the original code!! 
+#include "opencv2/imgproc/imgproc_c.h"
+#include "opencv2/imgproc/imgproc.hpp"
+
 #include "OpenCVCamera.h"
 
 namespace msv {
-	using namespace cv;
+
     OpenCVCamera::OpenCVCamera(const string &name, const uint32_t &id, const uint32_t &width, const uint32_t &height, const uint32_t &bpp) :
         Camera(name, id, width, height, bpp),
         m_capture(NULL),

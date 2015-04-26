@@ -20,17 +20,13 @@
 #ifndef OPENCVCAMERA_H_
 #define OPENCVCAMERA_H_
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-//#include <opencv2/core/utility.hpp>
-#include <opencv2/core/core_c.h> // missing befor needed for c style code
+#include "opencv2/highgui/highgui.hpp"
 
 #include "Camera.h"
 
 namespace msv {
 
-    	using namespace std;
-	using namespace cv;
+    using namespace std;
 
     /**
      * This class wraps an OpenCV camera and captures its data into a shared memory segment.

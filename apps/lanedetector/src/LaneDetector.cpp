@@ -21,6 +21,7 @@
 #include <opencv/cv.h>
 #include <opencv/highgui.h>
 
+#include "core/data/Constants.h"
 #include "core/macros.h"
 #include "core/base/KeyValueConfiguration.h"
 #include "core/data/Container.h"
@@ -42,8 +43,6 @@ namespace msv {
     using namespace core::data::image;
     using namespace tools::player;
     using namespace cv;
-    
-    bool intersection_protect = 0;
 
     LaneDetector::LaneDetector(const int32_t &argc, char **argv) : ConferenceClientModule(argc, argv, "lanedetector"),
         m_hasAttachedToSharedImageMemory(false),
@@ -119,173 +118,227 @@ namespace msv {
 
     // You should start your work in this method.
     void LaneDetector::processImage() {
+
+//change the image
+const int low_threshold  = 50;
+const int high_threshold = 150;
+IplImage* grayImg; 
+IplImage* cannyImg; 
+
+//IplImage* last;
+	
+
+  
+
+grayImg = cvCreateImage( cvSize(m_image->width, m_image->height), IPL_DEPTH_8U, 1 );
+	
+cvCvtColor( m_image, grayImg, CV_RGB2GRAY );//makes the image grey
+cannyImg = cvCreateImage(cvGetSize(m_image), IPL_DEPTH_8U, 1);
+
+cvCanny(grayImg, cannyImg, low_threshold, high_threshold, 3);//does canny on image
+//converts back to color but doesnt work, makes it crash
+//last = cvCreateImage(cvGetSize(m_image), IPL_DEPTH_8U, 1 ); 
+cvCvtColor( cannyImg, m_image, CV_GRAY2RGB );
+
+cvReleaseImage(&grayImg);
+cvReleaseImage(&cannyImg);
+
+   // cvNamedWindow   ("Source", 1);
+   
+
         // Example: Show the image.
     	
     	//draw a line       
     	        int width = m_image -> width;
     	        int height = m_image -> height;
-    	        int step  = m_image ->widthStep;
+		cout << "width"<< width<<endl;
+    	        int move  = m_image ->widthStep;
+		//int moveupp = m_image ->heightStep;
     	        unsigned char* image = (unsigned char*)m_image->imageData;
-    	        int sample_near = 60; // define near vision
-    	        int sample_mid = 150; //define mid vision
-    	        int sample_mid2 = 90; //define mid vision
-    	        int sample_mid3 = 120; //define mid vision
-    	        int sample_far = 240; // define further vision
-    	        int desired_right_near =241; //243
-    	        int desired_right_far =75; // 73
-    	        double k = 0.12; //portion control 0.2
-    	        int max_left = -24;
-    	        int max_right = 24;// max turning steering 
-    	        //cout << " width:"<< width<<endl;
-    	        //cout << " height:"<< height<<endl;
-    	        CvScalar red = CV_RGB(250,0,0);
-    	        CvScalar green = CV_RGB(0,250,0);
-    	        CvScalar blue = CV_RGB(0,0,250);
+    	        int sample_right = 60; // define near vision
+		int right_2 = 200;
+    	        int sample_left1 = 60; // define further vision
+		int sample_left2 = 100;
+		int sample_left3 = 140;
+		int sample_left4 = 180;
+    	        int desired_right =244; //220
+		int desired_left = 174;
+		int desired_left2 = 206;
+		int desired_left3 = 168;
+		int desired_left4 = 131;
+		//int right1 = width/2;
+		//int right2 = height -60;
+	
+
+		cv::Point pt1; //right_sample_start
+		pt1.x=width/2;
+		pt1.y= height -60;
+		
+		cv::Point pt3; //left_sample_start1
+		pt3.x=width/2;
+		pt3.y=height -60;
+
+		cv::Point pt5; //left_sample_start2
+		pt5.x=width/2;
+		pt5.y=height -100;
+
+		cv::Point pt7; //left_sample_start3
+		pt7.x=width/2;
+		pt7.y=height -140;
+
+		cv::Point pt9; //left_sample_start3
+		pt9.x=width/2;
+		pt9.y=height -180;
+
+		cv::Point pt11; //left_sample_start3
+		pt11.x=width/2;
+		pt11.y=height -200;
+
+
+		//int front = 399;
+    	       // CvScalar red = CV_RGB(250,0,0);
+    	       // CvScalar green = CV_RGB(0,250,0);
+		CvScalar blue = CV_RGB(0,0,250);
     	        int thickness = 1;
     	        int connectivity = 8;
-    	        bool near_lost = 0;// near vision lost    	       
-    	        bool far_lost = 0;//  far vision lost
-    	        bool left_lost = 0; // left vision lost (left)
-    	        
-    	       
-    	        double left_range = 0.4; // (0,0.5)
-    	        
+    	        //int uppheight = height/2
     	        CvPoint ver_centr_start = cvPoint(width/2,height);
     	        CvPoint ver_centr_end = cvPoint(width/2,0);
-    	        CvPoint near_sample_start = cvPoint(width/2,height- sample_near);
-    	        CvPoint mid_sample_start = cvPoint(width/2,height- sample_mid);
-    	        CvPoint mid2_sample_start = cvPoint(width/2,height- sample_mid2);
-    	        CvPoint mid3_sample_start = cvPoint(width/2,height- sample_mid3);
-    	        CvPoint near_sample_end ;
-    	        CvPoint mid_sample_left_end ;
-    	        CvPoint mid2_sample_left_end ;
-    	        CvPoint mid3_sample_left_end ;
-    	        CvPoint near_sample_left_end ;
-    	        CvPoint far_sample_start = cvPoint(width/2,height- sample_far);
-    	        CvPoint far_sample_end ;
-    	       
+    	        //CvPoint right_sample_start = cvPoint(width/2,height- sample_right);//first line
+    	        //CvPoint right_sample_end ;
+		//CvPoint right_inter_start = cvPoint(width/2,height - right_2);
+               // CvPoint right_inter_end;
+		
+    	       // CvPoint left_sample_start1 = cvPoint(width/2,height- sample_left1);
+		//CvPoint left_sample_start2 = cvPoint(width/2,height- sample_left2);
+		//CvPoint left_sample_start3 = cvPoint(width/2,height- sample_left3);
+		//CvPoint left_sample_start4 = cvPoint(width/2,height- sample_left4);
+    	       // CvPoint left_sample_end ;
+		//CvPoint left_sample_end2 ;
+		//CvPoint left_sample_end3 ;
+    	     //  CvPoint left_sample_end4 ;
     	        
        
 
         //TODO: Start here.
-    	int right_near = 0;
-        int right_near1 = 0;
-        int right_near2 = 0;
-        int right_far = 0;
-        int left_near=0;
-        int left_mid=0;
-        int left_mid2=0;
-        int left_mid3=0;
+        
+        int right = 0;
+	int right_i = 0;
+        int left = 0;
+	int left2 = 0;
+	int left3 = 0;
+	int left4 = 0;
+	//int upp = 0;
         // 1. Do something with the image m_image here, for example: find lane marking features, optimize quality, ...
         // find right distance 
-        //  I (x, y) ~ ((unsigned char*) (img-> imageData + img-> widthStep * y)) [x]        3 chanel     
-        
-        while((image + step * (height- sample_near -2)) [(width/2+right_near1)*3]==0 && right_near1 < width/2 ){ right_near1 ++;} 
-        while((image + step * (height- sample_near +2)) [(width/2+right_near2)*3]==0 && right_near2 < width/2 ){ right_near2 ++;} 
-        while((image + step * (height- sample_far)) [(width/2+right_far)*3]==0 && right_far < width/2 ) {right_far++; }
-        while((image + step * (height- sample_near)) [(width/2-left_near)*3]==0 && left_near < width/2 ){ left_near ++;}
-        while((image + step * (height- sample_mid)) [(width/2-left_mid)*3]==0 && left_mid < width/2 ){ left_mid ++;}
-        while((image + step * (height- sample_mid2)) [(width/2-left_mid2)*3]==0 && left_mid2 < width/2 ){ left_mid2 ++;}
-        while((image + step * (height- sample_mid3)) [(width/2-left_mid3)*3]==0 && left_mid3 < width/2 ){ left_mid3 ++;}
-        
-        if (right_near1 ==0 ||right_near2 ==0){ // this case happens only when running into the stop line when entering the intersection
-        	right_near = desired_right_near;
-        }
-        
-        if (right_near1 >= width/2 && right_near2 >= width/2 ){ // near vision lost
-        	near_lost = 1; 
-        	
-        }
-        else { 		// near vision not lost , decide right_near
-        	if (right_near1 >= width/2){ 
-        		right_near = right_near2;       	
-        	}
-        	else if (right_near2 >= width/2){
-        		right_near = right_near1;  
-        	} 
-        	else{
-        		right_near = (right_near1 + right_near2)/2 ;
-        	}
-        	near_lost = 0; 
-        }
-        
-        if (right_far >= width/4){ // far vision lost
-                	far_lost = 1;  	   
-                }
-                else {
-                	far_lost = 0; 
-                }
-        
-        if (left_near  >= width*left_range && left_mid  >= width*left_range && left_mid2  >= width*left_range && left_mid3  >= width*left_range){ // left lost left
-        			left_lost = 1;  	   
-              }
-              else {
-                    left_lost = 0; 
-             }
-      
-        
-        // state machine
-        
-       if (near_lost){
-    	   cout << "near lost"<<endl;
-       }
-       else{
-    	   cout << "right_near:"<< right_near<<endl;
-       }
-       
-       if (far_lost){
-          	   cout << "far lost"<<endl;
-             }
-       else{
-            	 cout << "right_far:"<< right_far<<endl;
-            }
-       
-       near_sample_end = cvPoint(width/2 + right_near ,height- sample_near);
-       far_sample_end = cvPoint(width/2 + right_far ,height- sample_far);
-       near_sample_left_end = cvPoint(width/2 - left_near ,height- sample_near);
-       mid_sample_left_end = cvPoint(width/2 - left_mid ,height- sample_mid);
-       mid2_sample_left_end = cvPoint(width/2 - left_mid2 ,height- sample_mid2);
-       mid3_sample_left_end = cvPoint(width/2 - left_mid3 ,height- sample_mid3);
+            
+while((image + move * (height- sample_right+2)) [(width/2+right)*3]==0 && right < width/2 ){ right ++;
+} 
+while((image + move * (height- right_2 + 2)) [(width/2+right_i)*3]==0 && right_i < width/2 ){ right_i ++;
+        } 
+while((image + move * (height- sample_left1+2)) [(width/2+left)*3]==0 && left < width/2 ) {left--;
+ }
+while((image + move * (height- sample_left2+2)) [(width/2+left2)*3]==0 && left2 < width/2 ) {left2--;
+ }
+while((image + move * (height- sample_left3+2)) [(width/2+left3)*3]==0 && left3 < width/2 ) {left3--;
+ }
+while((image + move * (height- sample_left4+2)) [(width/2+left4)*3]==0 && left4 < width/2 ) {left4--;
+ }
+	
+	      	cout << "right:"<< right<<endl;
+	      	cout << "left:"<< left<<endl;
+		//int lenright = width/2+right;
+		//int lenright1 = height -60;
+		cv::Point pt2;//right end
+		pt2.x=width/2+right;
+		pt2.y=height -60;
+
+		cv::Point pt4;//left1 end
+		pt4.x=width/2 +left;
+		pt4.y=height-60;
+
+		cv::Point pt6;//left2 end
+		pt6.x=width/2 +left2;
+		pt6.y=height-100;
+
+		cv::Point pt8;//left3 end
+		pt8.x=width/2 +left3;
+		pt8.y=height-140;
+
+		cv::Point pt10;//left3 end
+		pt10.x=width/2 +left4;
+		pt10.y=height-180;
+
+		cv::Point pt12;//rightinter end
+		pt12.x=width/2 +right_i;
+		pt12.y=height-200;
+	      	//right_sample_end = cvPoint(width/2 + right ,height- sample_right);
+		//right_inter_end = cvPoint(width/2 + right_i,height - right_2);
+	      	//left_sample_end = cvPoint(width/2 + left ,height- sample_left1);
+		//left_sample_end2 = cvPoint(width/2 + left2 ,height- sample_left2);
+		//left_sample_end3 = cvPoint(width/2 + left3 ,height- sample_left3);
+		//left_sample_end4 = cvPoint(width/2 + left4 ,height- sample_left4);
+
        if (m_debug) {
                   if (m_image != NULL) {
-                	  cvLine(m_image,ver_centr_start,ver_centr_end,red,thickness,connectivity);
-                	  cvLine(m_image,near_sample_start,near_sample_end,green,thickness,connectivity);
-                	  cvLine(m_image,far_sample_start,far_sample_end,green,thickness,connectivity);
-                	  cvLine(m_image,near_sample_start,near_sample_left_end ,blue,thickness,connectivity);
-                	  cvLine(m_image,mid_sample_start,mid_sample_left_end ,blue,thickness,connectivity);
-                	  cvLine(m_image,mid2_sample_start,mid2_sample_left_end ,blue,thickness,connectivity);
-                	  cvLine(m_image,mid3_sample_start,mid3_sample_left_end ,blue,thickness,connectivity);
-                      cvShowImage("WindowShowImage", m_image);
+
+
+                	  cvLine(m_image,ver_centr_start,ver_centr_end,blue,thickness,connectivity);//center line
+                	  cvLine(m_image,pt1,pt2,blue,thickness,connectivity);//line one 
+                	  cvLine(m_image,pt3,pt4,blue,thickness,connectivity);//line two (1)
+			cvLine(m_image,pt5,pt6,blue,thickness,connectivity);//line two (2)
+			cvLine(m_image,pt7,pt8,blue,thickness,connectivity);//line two (3)
+                  	cvLine(m_image,pt9,pt10,blue,thickness,connectivity);//line two (4)
+			cvLine(m_image,pt11,pt12,blue,thickness,connectivity);// second right line
+			
+                   //  cvShowImage("WindowShowImage", last);// the lines above should perhaps be last instead of cannyImg? 
+		cvShowImage("WindowShowImage", m_image);
                       cvWaitKey(10);
                   }
               }
        
         // 2. Calculate desired steering commands from your image features to be processed by driver.
-       double difference = 0;
-       if (!near_lost){
-    	   difference = (  right_near-desired_right_near) *k ;
-    	   intersection_protect = 0; // unflag intersection protects
-    	   
-       } 
-       else{   	 // near lost  
-    	   if (!left_lost && !intersection_protect){ 
-    		   difference = max_right;
-    		   
-    	   }
-    	   else if (!far_lost){ //intersection mode    		   
-    		   difference = (  right_far-desired_right_far) *k ; 
-    		   intersection_protect = 1;// 
-    	   }
-       }
-       
-       if (difference < max_left) difference = max_left;
-       if ( difference > max_right) difference = max_right;
-        
-        
-        
+         SteeringData sd;
+
+        double angle = ((right + 1) - desired_right); //difference between the distance we want and the actual distance
+	double backupangle1 = ((left +1) +desired_left);//backupangle
+	double backupangle2 = ((left2 +1) +desired_left2);		
+	double backupangle3 = ((left3 +1) +desired_left3);
+	double backupangle4 = ((left4 +1) +desired_left4);
+	double backupangle = 0;
+	/*if (backupangle1 <= -489 || backupangle2 <= -489 || backupangle3 <= -303 || backupangle4 <= -400 ){ backupangle = 0;
+}else { backupangle = ((backupangle1 + backupangle2 + backupangle3 + backupangle4)/4);}*/
+
+
+
+//double backupangle = ((((left +1) +desired_left)+((left2 +1) +desired_left2) + ((left3 +1) +desired_left3) + ((left4 +1) +desired_left4)) /4);
+cout << "angle1 ="<< backupangle<<endl;//-489  on line 70
+/*cout << "angle2 ="<< backupangle2<<endl;//-489  on line 70
+cout << "angle3 ="<< backupangle3<<endl;//on line (32) -303
+cout << "angle4 ="<< backupangle4<<endl;// -400  on line 113*/
+//if(backupangle <= -400){ backupangle =0;}
+	//if(right >= 320) { angle = 0;}// ignoring intersection
+/*if(right >= 320) { angle = 0;}
+     if(right < 300 && right > 200 && right_i >=320){angle = 500;}
+      if(right>=320 && right_i>=320){angle = 1000;}*/
+	if( right<= 3 || right >= 320 || right_i <=5 || right_i >=320) {// if the right line does not work for some reason then it uses the 4 left lines isntead.
+		if (backupangle1 <= 10 || backupangle1 >= -10) { backupangle = backupangle1;
+  			 if(backupangle2 <=10 || backupangle2 >= -10) { backupangle = backupangle2;
+				if(backupangle3 <=10 || backupangle3 >= -10) { backupangle = backupangle3;
+					if(backupangle4 <=10 || backupangle4 >= -10) { backupangle = backupangle4;}
+}}}backupangle = backupangle * 0.20491803278;
+	sd.setExampleData(backupangle);}
+
+	if(right >= 320) { angle = 0;}
+      if(right < 300 && right > 200 && right_i >=320){angle = 500;}
+       if(right>=320 && right_i>=320){angle = 1000;}
+	
         // Here, you see an example of how to send the data structure SteeringData to the ContainerConference. This data structure will be received by all running components. In our example, it will be processed by Driver. To change this data structure, have a look at Data.odvd in the root folder of this source.
-        SteeringData sd;
-        sd.setExampleData(difference);
+        angle = angle * 0.20491803278;
+        cout << "angle"<< angle<<endl;
+        sd.setExampleData(angle); // sending the steeringwheel degree to driver.
+
+	
 
         // Create container for finally sending the data.
         Container c(Container::USER_DATA_1, sd);
@@ -304,12 +357,16 @@ namespace msv {
 /*
         // Lane-detector can also directly read the data from file. This might be interesting to inspect the algorithm step-wisely.
         core::io::URL url("file://recorder.rec");
+
         // Size of the memory buffer.
         const uint32_t MEMORY_SEGMENT_SIZE = kv.getValue<uint32_t>("global.buffer.memorySegmentSize");
+
         // Number of memory segments.
         const uint32_t NUMBER_OF_SEGMENTS = kv.getValue<uint32_t>("global.buffer.numberOfMemorySegments");
+
         // If AUTO_REWIND is true, the file will be played endlessly.
         const bool AUTO_REWIND = true;
+
         player = new Player(url, AUTO_REWIND, MEMORY_SEGMENT_SIZE, NUMBER_OF_SEGMENTS);
 */
 
